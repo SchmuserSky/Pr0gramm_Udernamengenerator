@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>pr0gramm Usernamen Generator</title>
+    <!-- Tailwind CSS laden -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Spezieller Font für bessere Optik */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+        
+        /* 1. Gesamter Body (Hintergrund und Standard-Textfarbe) */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #161618; /* Dunkler Hintergrund */
+            color: #f2f5f4; /* Helle Schriftfarbe */
+        }
+        
+        /* 2. Akzentfarbe für Logo und Buttons */
+        .pr0-bg {
+            background-color: #ee4d2e; /* Primäre Akzentfarbe */
+            background-image: linear-gradient(135deg, #ee4d2e 0%, #ff5722 100%);
+        }
+        
+        /* 3. Karten-Stil */
+        .pr0-card {
+            background-color: #282828; /* Etwas hellere Karte als Hintergrund */
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4), 0 5px 10px rgba(0, 0, 0, 0.2);
+            border: 3px solid #ee4d2e; /* Akzent-Rand */
+        }
+        
+        /* 4. Ergebnis-Box */
+        .result-box {
+            background-color: #161618; /* Sehr dunkler Hintergrund für das Ergebnis */
+            color: #ee4d2e; /* Akzentfarbe für das Ergebnis */
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
+            border: 1px solid #ee4d2e55;
+        }
+
+        /* 5. Anpassung der Input-Felder für den Dark Mode */
+        input[type="text"] {
+            background-color: #161618;
+            color: #f2f5f4;
+            border: 1px solid #444;
+        }
+
+        input[type="text"]:focus {
+            border-color: #ee4d2e;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-md p-6 md:p-8 rounded-xl pr0-card transform transition duration-500 hover:scale-[1.02]">
+        
+        <h1 class="text-3xl font-extrabold text-center mb-6 text-[#f2f5f4]">
+            <span class="pr0-bg text-[#f2f5f4] px-2 py-1 rounded-lg">pr0</span>gramm Namensgenerator
+        </h1>
+
+        <p class="text-center text-sm text-gray-400 mb-8">
+            Gib deinen Vornamen und Nachnamen ein, um einen passenden, pr0würdigen Usernamen zu generieren.
+        </p>
+
+        <!-- Eingabefelder -->
+        <div class="space-y-4 mb-8">
+            <div>
+                <label for="firstName" class="block text-sm font-medium text-[#f2f5f4] mb-1">Vorname (für den Präfix)</label>
+                <input type="text" id="firstName" placeholder="Z.B. Max" class="w-full p-3 rounded-lg focus:ring-2 focus:ring-[#ee4d2e] focus:border-[#ee4d2e] transition" autocomplete="given-name">
+            </div>
+            <div>
+                <label for="lastName" class="block text-sm font-medium text-[#f2f5f4] mb-1">Nachname (für den Suffix)</label>
+                <input type="text" id="lastName" placeholder="Z.B. Mustermann" class="w-full p-3 rounded-lg focus:ring-2 focus:ring-[#ee4d2e] focus:border-[#ee4d2e] transition" autocomplete="family-name">
+            </div>
+        </div>
+
+        <!-- Button -->
+        <button id="generateBtn" class="w-full pr0-bg text-[#f2f5f4] font-bold py-3 rounded-lg shadow-lg hover:shadow-xl transition duration-300 ease-in-out transform hover:scale-[1.01] active:scale-[0.99] focus:outline-none focus:ring-4 focus:ring-[#ee4d2e]/50">
+            Usernamen generieren
+        </button>
+
+        <!-- Ergebnisbereich -->
+        <div class="mt-8">
+            <h2 class="text-lg font-semibold text-[#f2f5f4] mb-3">Dein neuer pr0-Name:</h2>
+            <div id="resultOutput" class="result-box p-4 rounded-lg text-2xl font-mono text-center break-words select-all min-h-[56px] flex items-center justify-center cursor-pointer" onclick="copyToClipboard('resultOutput')">
+                <span class="text-gray-500 text-base italic">Hier erscheint dein Name...</span>
+            </div>
+            <p id="copyMessage" class="text-xs text-[#ee4d2e] text-center mt-2 opacity-0 transition-opacity duration-300">
+                (Klicken zum Kopieren)
+            </p>
+        </div>
+        
+        <!-- Fehler- und Meldungsbereich (Modal-Ersatz) -->
+        <div id="messageBox" class="fixed inset-0 bg-black bg-opacity-75 hidden items-center justify-center p-4 z-50" onclick="closeMessageBox()">
+            <div class="bg-gray-800 p-6 rounded-xl shadow-2xl max-w-sm w-full" onclick="event.stopPropagation()">
+                <h3 class="text-xl font-bold mb-3 text-[#ee4d2e]">Achtung!</h3>
+                <p id="messageText" class="text-[#f2f5f4]"></p>
+                <button onclick="closeMessageBox()" class="mt-4 w-full pr0-bg text-[#f2f5f4] font-bold py-2 rounded-lg transition duration-300">Schließen</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script type="module">
+        // Hilfsfunktion zum Kopieren in die Zwischenablage
+        const copyToClipboard = (elementId) => {
+            const outputElement = document.getElementById(elementId);
+            const textToCopy = outputElement.innerText;
+            
+            // Textbereich erstellen, um den Inhalt zu kopieren
+            const tempInput = document.createElement('textarea');
+            tempInput.value = textToCopy;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            
+            try {
+                // Führt den Kopierbefehl aus
+                document.execCommand('copy'); 
+                const copyMsg = document.getElementById('copyMessage');
+                copyMsg.innerText = 'Name kopiert! 👍';
+                copyMsg.classList.remove('opacity-0');
+                copyMsg.classList.add('opacity-100');
+                setTimeout(() => {
+                    copyMsg.classList.remove('opacity-100');
+                    copyMsg.classList.add('opacity-0');
+                    copyMsg.innerText = '(Klicken zum Kopieren)'; // Setze den Originaltext zurück
+                }, 2000);
+            } catch (err) {
+                // Bei Fehler eine Meldung anzeigen
+                showMessageBox('Kopieren fehlgeschlagen.', 'Bitte kopiere den Text manuell: ' + textToCopy);
+            } finally {
+                document.body.removeChild(tempInput);
+            }
+        };
+
+        // Funktion zum Anzeigen des modalen Meldungsfelds (ersetzt alert)
+        const showMessageBox = (title, message) => {
+            document.getElementById('messageBox').querySelector('h3').innerText = title;
+            document.getElementById('messageText').innerText = message;
+            document.getElementById('messageBox').classList.remove('hidden');
+            document.getElementById('messageBox').classList.add('flex');
+        };
+
+        // Funktion zum Schließen des modalen Meldungsfelds
+        const closeMessageBox = () => {
+            document.getElementById('messageBox').classList.remove('flex');
+            document.getElementById('messageBox').classList.add('hidden');
+        };
+
+        // ##########################################################################
+        // LISTEN FÜR EASTER EGGS
+        // ##########################################################################
+        // Eine kleine Liste gängiger weiblicher Vornamen (für den Pop-up-Trigger)
+        const FEMALE_NAMES = ['ANNA', 'MARIE', 'SOPHIE', 'EMMA', 'HANNAH', 'LEONIE', 'LINA', 'MIA', 'LARA', 'JANA', 'SARA', 'EVA', 'LENA', 'JULIA', 'NADINE', 'SABRINA', 'LAURA', 'MONA', 'SARAH', 'MAXI', 'ANASTASIA', 'HELENA', 'FINJA', 'LOTTA', 'NELE', 'ELENA', 'KARLA', 'VALENTINA'];
+        
+        // ##########################################################################
+        // HIER KANNST DU DIE NAMEN ANPASSEN!
+        // ##########################################################################
+        const nameParts = {
+            // Präfixe (Vom Vornamen)
+            prefixes: {
+                A: ['Anonymus', 'Anus', 'Alpha', 'Adolf', 'Arsch'],
+                B: ['Banane', 'Bobr', 'Brot', 'Basis'],
+                C: ['Clown', 'Cyber', 'Chaos', 'Chef'],
+                D: ['Die', 'Der', 'Digital', 'Dom', 'Dödel', 'Döner'], 
+                E: ['Elite', 'Epic', 'Edler', 'Esel'],
+                F: ['Flauschi', 'Fussel', 'Fluff', 'Ficker', 'Fotzen'],
+                G: ['Giga', 'God', 'Grill', 'Gamer', 'Gay', 'GHC', 'Google'],
+                H: ['Hacker', 'Herpes', 'Hero', 'Haupt'],
+                I: ['Iro', 'Inter', 'Ich', 'Igel'],
+                J: ['Jumbo', 'Juden', 'Jäger', 'Jot'],
+                K: ['Kek', 'Konto', 'Keks', 'Kumpel'],
+                L: ['Lucker', 'Loft', 'Lachs', 'Leit'],
+                M: ['Meme', 'Meister', 'Mega', 'MPM'],
+                N: ['Noob', 'Nacht', 'Netz', 'Neger','Nutten'],
+                P: ['Pr0', 'Pixel', 'Profi', 'Penis', 'Pisse'],
+                Q: ['Quark', 'Quad', 'Quentin', 'Quick'],
+                R: ['Ratte', 'Raffel', 'Retro', 'Riff'],
+                S: ['Schnitzel', 'Super', 'Schwuchtel','Schmuser', 'Sky'],
+                T: ['Toxic', 'Troll', 'Turbo', 'Thor', 'Transen'],
+                U: ['Ultra', 'Unfall', 'Über'],
+                V: ['Voll', 'Virus', 'Vulkan', 'Viper'],
+                W: ['Wal', 'Witz', 'Wumme', 'Wander'],
+                X: ['Xenon', 'Xylophon', 'Xtreme', 'X-Ray'],
+                Y: ['Yeti', 'Yolo', 'Yacht'],
+                Z: ['Zocker', 'Zentrum', 'Zonk', 'Zombie']
+            },
+            // Suffixe (Vom Nachnamen)
+            suffixes: {
+                A: ['-Affix', '-Ananas', '-Arsch', '-Axt'],
+                B: ['-Biest', '-Boss', '-Blase', '-Bacon', '-Benis'],
+                C: ['-Code', '-Core', '-Chan', '-Clip'],
+                D: ['-Dude', '-Dachs', '-Dame', '-Drache'],
+                E: ['-Eule', '-Eier', '-Eis', '-Esser'],
+                F: ['-Flauscher', '-Fisch', '-Fail', '-Fussel', '-Fotze'],
+                G: ['-Gerät', '-Geist', '-Guru', '-Gott', '-Gamb'],
+                H: ['-Helm', '-Hase', '-Hund', '-Honk', '-Herpes'],
+                I: ['-Idiot', '-Ingenieur', '-Insta', '-Igel'],
+                J: ['-Joker', '-Junkie', '-Junge', '-Jot'],
+                K: ['-Kadse', '-Keks', '-Killer', '-King', '-Kopp'],
+                L: ['-Lama', '-Lappen', '-Looser', '-Loch'],
+                M: ['-Master', '-Meister', '-Mode', '-Maus'],
+                N: ['-Nugget', '-Noob', '-Nudel', '-Netz', '-Nutte'],
+                P: ['-Panda', '-Power', '-Penner', '-Pr0'],
+                Q: ['-Quark', '-Qualle', '-Quader', '-Quast'],
+                R: ['-Ritter', '-Rocker', '-Ratte', '-Riese'],
+                S: ['-Slayer', '-Sensei', '-Salz', '-Socke','-Schmuser'],
+                T: ['-Tank', '-Troll', '-Tube', '-Tier'],
+                U: ['-Ultra', '-Unit', '-Uhu', '-Ulm'],
+                V: ['-Virus', '-Viper', '-Vogel', '-Vollpfosten'],
+                W: ['-Wurst', '-Wicht', '-Wolf', '-Welle'],
+                X: ['-Xenon', '-Xylophon', '-X-Box', '-Xer'],
+                Y: ['-Yeti', 'Yolo', 'Yacht'],
+                Z: ['-Zocker', '-Zahn', '-Zwerg', '-Zombie']
+            }
+        };
+        // ##########################################################################
+        // ENDE DES ANPASSBAREN BEREICHS
+        // ##########################################################################
+
+
+        // Funktion zum Normalisieren des Anfangsbuchstaben (Umlaute/Sonderzeichen)
+        const normalizeLetter = (name) => {
+            if (!name || name.length === 0) return '';
+            let letter = name.trim().toUpperCase().charAt(0);
+            
+            // Ersetze Umlaute, um eine klare Zuordnung zu A-Z zu gewährleisten
+            switch (letter) {
+                case 'Ä': return 'A';
+                case 'Ö': return 'O';
+                case 'Ü': return 'U';
+                default: return letter; 
+            }
+        };
+
+        // Hauptfunktion zur Generierung des Usernamens
+        const generateUsername = () => {
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const output = document.getElementById('resultOutput');
+            const placeholderText = '<span class="text-gray-500 text-base italic">Hier erscheint dein Name...</span>';
+            output.innerHTML = placeholderText;
+            
+            const normalizedFirstName = firstName.toUpperCase();
+
+            // 1. Eingabeprüfung
+            if (!firstName || !lastName) {
+                showMessageBox('Fehlende Eingabe', 'Bitte gib sowohl einen Vornamen als auch einen Nachnamen ein.');
+                return;
+            }
+
+            // 2. EASTER EGG PRÜFUNG: "Maxschmuser" Lösch-Dich-Trigger
+            // Prüfen, ob der Vorname "Max" und der Nachname "Schmuser" (case-insensitive) ist
+            if (normalizedFirstName === 'MAX' && lastName.toUpperCase() === 'SCHMUSER') {
+                output.textContent = 'bitte lösch dich';
+                document.getElementById('copyMessage').classList.remove('opacity-0');
+                return; // Stoppe hier, wenn dieser Easter Egg zutrifft
+            }
+
+            // Reguläre Namensgenerierung
+            const prefixKey = normalizeLetter(firstName);
+            const suffixKey = normalizeLetter(lastName);
+
+            const prefixes = nameParts.prefixes[prefixKey];
+            const suffixes = nameParts.suffixes[suffixKey];
+
+            if (!prefixes || !suffixes) {
+                showMessageBox('Fehler', 'Entschuldigung, es gab ein Problem bei der Zuordnung des Anfangsbuchstabens. Bitte versuche es mit einem Standard-Buchstaben (A-Z).');
+                return;
+            }
+
+            const randomPrefix = prefixes[Math.floor(Math.random() * prefixes.length)];
+            const randomSuffix = suffixes[Math.floor(Math.random() * suffixes.length)];
+
+            // Kombination und Formatierung
+            const finalUsername = randomPrefix.charAt(0).toUpperCase() + randomPrefix.slice(1).toLowerCase() + 
+                                  randomSuffix.replace(/^-/, ''); 
+
+            output.textContent = finalUsername;
+            document.getElementById('copyMessage').classList.remove('opacity-0');
+
+
+            // 3. EASTER EGG PRÜFUNG: Weiblicher Vorname -> Popup
+            // Prüfen, ob der Vorname in der Liste weiblicher Namen ist
+            if (FEMALE_NAMES.includes(normalizedFirstName)) {
+                showMessageBox('pr0gramm-Regel', 'Zeig Arschfotze!');
+            }
+        };
+
+        // Event Listener für den Button
+        document.getElementById('generateBtn').addEventListener('click', generateUsername);
+        
+        // Initialisiere die Kopier-Meldung, damit sie beim Laden nicht sichtbar ist
+        document.getElementById('copyMessage').classList.add('opacity-0');
+        
+        // Optional: Enter-Taste in den Eingabefeldern zum Generieren nutzen
+        document.getElementById('firstName').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') generateUsername();
+        });
+        document.getElementById('lastName').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') generateUsername();
+        });
+
+        // Hänge die Funktion global an, damit sie durch das inline-HTML Attribut 'onclick' funktioniert
+        window.copyToClipboard = copyToClipboard;
+        window.closeMessageBox = closeMessageBox;
+
+        // Firebase / Firestore Boilerplate (Nicht verwendet, aber für die Umgebung erforderlich)
+        /*
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const auth = getAuth(initializeApp(firebaseConfig));
+        
+        if (typeof __initial_auth_token !== 'undefined') {
+            signInWithCustomToken(auth, __initial_auth_token)
+                .then(() => console.log('Authenticated with custom token.'))
+                .catch(error => console.error('Custom token sign-in failed:', error));
+        } else {
+            signInAnonymously(auth)
+                .then(() => console.log('Authenticated anonymously.'))
+                .catch(error => console.error('Anonymous sign-in failed:', error));
+        }
+        */
+    </script>
+</body>
+</html>
+
