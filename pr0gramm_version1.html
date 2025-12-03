@@ -146,16 +146,11 @@
             document.getElementById('messageBox').classList.remove('flex');
             document.getElementById('messageBox').classList.add('hidden');
         };
-
-        // ##########################################################################
-        // LISTEN FÜR EASTER EGGS
-        // ##########################################################################
+        
         // Eine kleine Liste gängiger weiblicher Vornamen (für den Pop-up-Trigger)
         const FEMALE_NAMES = ['ANNA', 'MARIE', 'SOPHIE', 'EMMA', 'HANNAH', 'LEONIE', 'LINA', 'MIA', 'LARA', 'JANA', 'SARA', 'EVA', 'LENA', 'JULIA', 'NADINE', 'SABRINA', 'LAURA', 'MONA', 'SARAH', 'MAXI', 'ANASTASIA', 'HELENA', 'FINJA', 'LOTTA', 'NELE', 'ELENA', 'KARLA', 'VALENTINA'];
         
-        // ##########################################################################
-        // HIER KANNST DU DIE NAMEN ANPASSEN!
-        // ##########################################################################
+      
         const nameParts = {
             // Präfixe (Vom Vornamen)
             prefixes: {
@@ -166,7 +161,7 @@
                 E: ['Elite', 'Epic', 'Edler', 'Esel'],
                 F: ['Flauschi', 'Fussel', 'Fluff', 'Ficker', 'Fotzen'],
                 G: ['Giga', 'God', 'Grill', 'Gamer', 'Gay', 'GHC', 'Google'],
-                H: ['Hacker', 'Herpes', 'Hero', 'Haupt'],
+                H: ['Hacker', 'Herpes', 'Hero', 'Haupt', 'Huren'],
                 I: ['Iro', 'Inter', 'Ich', 'Igel'],
                 J: ['Jumbo', 'Juden', 'Jäger', 'Jot'],
                 K: ['Kek', 'Konto', 'Keks', 'Kumpel'],
@@ -204,7 +199,7 @@
                 P: ['-Panda', '-Power', '-Penner', '-Pr0'],
                 Q: ['-Quark', '-Qualle', '-Quader', '-Quast'],
                 R: ['-Ritter', '-Rocker', '-Ratte', '-Riese'],
-                S: ['-Slayer', '-Sensei', '-Salz', '-Socke','-Schmuser'],
+                S: ['-Slayer', '-Sensei', '-Sohn', '-Socke','-Schmuser'],
                 T: ['-Tank', '-Troll', '-Tube', '-Tier'],
                 U: ['-Ultra', '-Unit', '-Uhu', '-Ulm'],
                 V: ['-Virus', '-Viper', '-Vogel', '-Vollpfosten'],
@@ -214,10 +209,6 @@
                 Z: ['-Zocker', '-Zahn', '-Zwerg', '-Zombie']
             }
         };
-        // ##########################################################################
-        // ENDE DES ANPASSBAREN BEREICHS
-        // ##########################################################################
-
 
         // Funktion zum Normalisieren des Anfangsbuchstaben (Umlaute/Sonderzeichen)
         const normalizeLetter = (name) => {
@@ -245,16 +236,15 @@
 
             // 1. Eingabeprüfung
             if (!firstName || !lastName) {
-                showMessageBox('Fehlende Eingabe', 'Bitte gib sowohl einen Vornamen als auch einen Nachnamen ein.');
+                showMessageBox('Fehlende Eingabe', 'Du Hurensohn, gib sowohl einen Vornamen als auch einen Nachnamen ein.');
                 return;
             }
 
-            // 2. EASTER EGG PRÜFUNG: "Maxschmuser" Lösch-Dich-Trigger
             // Prüfen, ob der Vorname "Max" und der Nachname "Schmuser" (case-insensitive) ist
             if (normalizedFirstName === 'MAX' && lastName.toUpperCase() === 'SCHMUSER') {
                 output.textContent = 'bitte lösch dich';
                 document.getElementById('copyMessage').classList.remove('opacity-0');
-                return; // Stoppe hier, wenn dieser Easter Egg zutrifft
+                return;
             }
 
             // Reguläre Namensgenerierung
@@ -279,8 +269,7 @@
             output.textContent = finalUsername;
             document.getElementById('copyMessage').classList.remove('opacity-0');
 
-
-            // 3. EASTER EGG PRÜFUNG: Weiblicher Vorname -> Popup
+            
             // Prüfen, ob der Vorname in der Liste weiblicher Namen ist
             if (FEMALE_NAMES.includes(normalizedFirstName)) {
                 showMessageBox('pr0gramm-Regel', 'Zeig Arschfotze!');
